@@ -1,6 +1,7 @@
 package kevinedwardgraham.com.criminal_intent;
 
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +18,9 @@ public class CrimeListFragment extends Fragment {
 
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
+
+    private static final int NORMAL_CRIME = 0;
+    private static final int SEVERE_CRIME = 1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -41,22 +45,62 @@ public class CrimeListFragment extends Fragment {
         mCrimeRecyclerView.setAdapter(mAdapter);
     }
 
+    private abstract class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public CrimeHolder(LayoutInflater inflator, ViewGroup container, @LayoutRes int resource) {
+            super(inflator.inflate(resource, container, false));
+        }
+
+        public abstract void bind(Crime crime);
+    }
+
     /**
      * Binds to a list_item_crime
      */
-    private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private class NormalCrimeHolder extends CrimeHolder {
 
         private TextView mTitleTextView;
         private TextView mDateTextView;
 
         private Crime mCrime;
 
-        public CrimeHolder(LayoutInflater inflator, ViewGroup parent) {
-            super(inflator.inflate(R.layout.list_item_crime, parent, false));
+        public NormalCrimeHolder(LayoutInflater inflator, ViewGroup container) {
+            super(inflator, container, R.layout.list_item_crime);
             itemView.setOnClickListener(this);
 
             mTitleTextView = itemView.findViewById(R.id.crime_title);
             mDateTextView = itemView.findViewById(R.id.crime_date);
+        }
+
+        public void bind(Crime crime) {
+            mCrime = crime;
+            mTitleTextView.setText(crime.getTitle());
+            mDateTextView.setText(crime.getDate().toString());
+        }
+
+        @Override
+        public void onClick(View v) {
+            Toast.makeText(getActivity(), mCrime.getTitle() + " clicked!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Binds to a list_item_severe
+     */
+    private class SevereCrimeHolder extends CrimeHolder {
+
+        private TextView mTitleTextView;
+        private TextView mDateTextView;
+        private TextView mPoliceButton;
+
+        private Crime mCrime;
+
+        public SevereCrimeHolder(LayoutInflater inflator, ViewGroup container) {
+            super(inflator, container, R.layout.list_item_severe);
+            itemView.setOnClickListener(this);
+
+            mTitleTextView = itemView.findViewById(R.id.crime_title);
+            mDateTextView = itemView.findViewById(R.id.crime_date);
+            mPoliceButton = itemView.findViewById(R.id.button_police);
         }
 
         public void bind(Crime crime) {
@@ -86,7 +130,15 @@ public class CrimeListFragment extends Fragment {
         @Override
         public CrimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            return new CrimeHolder(layoutInflater, parent);
+
+            switch (viewType) {
+                case SEVERE_CRIME:
+                    return new SevereCrimeHolder(layoutInflater, parent);
+                case NORMAL_CRIME:
+                    return new NormalCrimeHolder(layoutInflater, parent);
+                default:
+                    return null;
+            }
         }
 
         @Override
@@ -98,6 +150,12 @@ public class CrimeListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mCrimes.size();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            Crime crime = mCrimes.get(position);
+            return crime.isRequiresPolice() ? SEVERE_CRIME : NORMAL_CRIME;
         }
     }
 }
