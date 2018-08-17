@@ -6,25 +6,24 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
 public class CrimeListFragment extends Fragment {
 
-    private RecyclerView mCrimeRecyclerView;
-    private CrimeAdapter mAdapter;
-
-    private static final String DATE_FORMAT = "EEEE, MMMM dd, yyyy";
 
     private static final int NORMAL_CRIME = 0;
     private static final int SEVERE_CRIME = 1;
+
+    private RecyclerView mCrimeRecyclerView;
+    private CrimeAdapter mAdapter;
+
+    private int mLastUpdatePosition = -1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,24 +36,50 @@ public class CrimeListFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
     private void updateUI() {
         // get model
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
 
-        // pass model to adapter
-        mAdapter = new CrimeAdapter(crimes);
+        if (mAdapter == null) {
+            // pass model to adapter
+            mAdapter = new CrimeAdapter(crimes);
+            // pass adapter to recycler view
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        } else {
+            if (mLastUpdatePosition > -1) {
+                // update specific item in recycler view
+                mAdapter.notifyItemChanged(mLastUpdatePosition);
+                mLastUpdatePosition = -1;
+            } else {
+                // update all items in recycler view
+                mAdapter.notifyDataSetChanged();
+            }
+        }
 
-        // pass adapter to recycler view
-        mCrimeRecyclerView.setAdapter(mAdapter);
     }
 
     private abstract class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        protected Crime mCrime;
+
         public CrimeHolder(LayoutInflater inflator, ViewGroup container, @LayoutRes int resource) {
             super(inflator.inflate(resource, container, false));
         }
 
         public abstract void bind(Crime crime);
+
+        @Override
+        public void onClick(View v) {
+            mLastUpdatePosition = getAdapterPosition();
+            startActivity(CrimeActivity.newIntent(getActivity(), mCrime.getId()));
+        }
     }
 
     /**
@@ -65,8 +90,6 @@ public class CrimeListFragment extends Fragment {
         private TextView mTitleTextView;
         private TextView mDateTextView;
         private ImageView mCrimeSolvedImageView;
-
-        private Crime mCrime;
 
         public NormalCrimeHolder(LayoutInflater inflator, ViewGroup container) {
             super(inflator, container, R.layout.list_item_crime);
@@ -80,13 +103,8 @@ public class CrimeListFragment extends Fragment {
         public void bind(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(crime.getTitle());
-            mDateTextView.setText(DateFormat.format(DATE_FORMAT, crime.getDate()).toString());
+            mDateTextView.setText(Utilities.formatDate(crime.getDate()));
             mCrimeSolvedImageView.setVisibility(crime.isSolved() ? View.VISIBLE : View.INVISIBLE);
-        }
-
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(getActivity(), mCrime.getTitle() + " clicked!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -98,8 +116,6 @@ public class CrimeListFragment extends Fragment {
         private TextView mTitleTextView;
         private TextView mDateTextView;
         private TextView mPoliceButton;
-
-        private Crime mCrime;
 
         public SevereCrimeHolder(LayoutInflater inflator, ViewGroup container) {
             super(inflator, container, R.layout.list_item_severe);
@@ -113,12 +129,7 @@ public class CrimeListFragment extends Fragment {
         public void bind(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(crime.getTitle());
-            mDateTextView.setText(DateFormat.format(DATE_FORMAT, crime.getDate()).toString());
-        }
-
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(getActivity(), mCrime.getTitle() + " clicked!", Toast.LENGTH_SHORT).show();
+            mDateTextView.setText(Utilities.formatDate(crime.getDate()));
         }
     }
 
