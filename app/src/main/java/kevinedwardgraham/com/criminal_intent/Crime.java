@@ -1,5 +1,7 @@
 package kevinedwardgraham.com.criminal_intent;
 
+import android.text.format.DateFormat;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -50,5 +52,13 @@ public class Crime {
 
     public void setRequiresPolice(boolean requiresPolice) {
         mRequiresPolice = requiresPolice;
+    }
+
+    public String getDateString() {
+        return DateFormat.format("EEEE, MMMM dd, yyyy", mDate).toString();
+    }
+
+    public String getTimeString() {
+        return DateFormat.format("k:mm aa", mDate).toString();
     }
 }

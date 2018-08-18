@@ -103,7 +103,7 @@ public class CrimeListFragment extends Fragment {
         public void bind(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(crime.getTitle());
-            mDateTextView.setText(Utilities.formatDate(crime.getDate()));
+            mDateTextView.setText(crime.getDateString());
             mCrimeSolvedImageView.setVisibility(crime.isSolved() ? View.VISIBLE : View.INVISIBLE);
         }
     }
@@ -129,7 +129,7 @@ public class CrimeListFragment extends Fragment {
         public void bind(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(crime.getTitle());
-            mDateTextView.setText(Utilities.formatDate(crime.getDate()));
+            mDateTextView.setText(crime.getDateString());
         }
     }
 
