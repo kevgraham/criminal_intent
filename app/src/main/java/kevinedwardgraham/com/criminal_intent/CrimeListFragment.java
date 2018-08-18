@@ -78,7 +78,7 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onClick(View v) {
             mLastUpdatePosition = getAdapterPosition();
-            startActivity(CrimeActivity.newIntent(getActivity(), mCrime.getId()));
+            startActivity(CrimePagerActivity.newIntent(getActivity(), mCrime.getId()));
         }
     }
 
