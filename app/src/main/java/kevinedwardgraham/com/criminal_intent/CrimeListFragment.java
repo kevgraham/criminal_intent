@@ -15,9 +15,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CrimeListFragment extends Fragment {
@@ -29,9 +32,13 @@ public class CrimeListFragment extends Fragment {
 
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
+    private LinearLayout mNoCrimesLayout;
+    private Button mNewCrimeButton;
 
     private int mLastUpdatePosition = -1;
     private boolean mSubtitleVisible;
+
+    private List<Crime> mCrimeList = new ArrayList<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,8 +62,23 @@ public class CrimeListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
+
         mCrimeRecyclerView = view.findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        mNoCrimesLayout = view.findViewById(R.id.linearlayout_no_crimes);
+
+        mNewCrimeButton = view.findViewById(R.id.button_new_crime);
+        mNewCrimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Crime crime = new Crime();
+                CrimeLab.get(getActivity()).addCrime(crime);
+                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId());
+                startActivity(intent);
+            }
+        });
+
 
         if (savedInstanceState != null) {
             mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
@@ -82,25 +104,23 @@ public class CrimeListFragment extends Fragment {
     private void updateUI() {
         // get model
         CrimeLab crimeLab = CrimeLab.get(getActivity());
-        List<Crime> crimes = crimeLab.getCrimes();
 
         if (mAdapter == null) {
             // pass model to adapter
-            mAdapter = new CrimeAdapter(crimes);
+            mAdapter = new CrimeAdapter(mCrimeList);
             // pass adapter to recycler view
             mCrimeRecyclerView.setAdapter(mAdapter);
         } else {
-//            if (mLastUpdatePosition > -1) {
-//                // update specific item in recycler view
-//                mAdapter.notifyItemChanged(mLastUpdatePosition);
-//                mLastUpdatePosition = -1;
-//            } else {
-//                // update all items in recycler view
-//                mAdapter.notifyDataSetChanged();
-//            }
-
             // update all items in recycler view
+            mCrimeList.clear();
+            mCrimeList.addAll(crimeLab.getCrimes());
             mAdapter.notifyDataSetChanged();
+        }
+
+        if (mCrimeList != null && mCrimeList.size() > 0) {
+            mNoCrimesLayout.setVisibility(View.INVISIBLE);
+        } else {
+            mNoCrimesLayout.setVisibility(View.VISIBLE);
         }
 
         updateSubtitle();

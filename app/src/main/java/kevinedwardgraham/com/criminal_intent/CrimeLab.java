@@ -16,6 +16,7 @@ public class CrimeLab {
     private static CrimeLab sCrimeLab;
 
     private Map<UUID, Crime> mCrimes;
+    private List<Crime> mCrimesList;
 
     private CrimeLab(Context content) {
         mCrimes = new LinkedHashMap<>();
