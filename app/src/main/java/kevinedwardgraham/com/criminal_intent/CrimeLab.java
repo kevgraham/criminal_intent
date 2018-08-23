@@ -18,15 +18,7 @@ public class CrimeLab {
     private Map<UUID, Crime> mCrimes;
 
     private CrimeLab(Context content) {
-        // temp data
         mCrimes = new LinkedHashMap<>();
-        for (int i = 0; i < 100; i++) {
-            Crime crime = new Crime();
-            crime.setTitle("Crime #" + i);
-            crime.setSolved(i % 2 == 0);
-            crime.setRequiresPolice(i % 4 == 0);
-            mCrimes.put(crime.getId(), crime);
-        }
     }
 
     /**
@@ -42,7 +34,25 @@ public class CrimeLab {
     }
 
     /**
-     * Get all crimes
+     * Adds the given Crime
+     * @param crime
+     */
+    public void addCrime(Crime crime) {
+        mCrimes.put(crime.getId(), crime);
+    }
+
+    /**
+     * Removes the given Crime
+     * @param crime
+     */
+    public void removeCrime(Crime crime) {
+        if (getCrime(crime.getId()) != null) {
+            mCrimes.remove(crime.getId());
+        }
+    }
+
+    /**
+     * Gets all Crimes
      * @return
      */
     public List<Crime> getCrimes() {
@@ -50,7 +60,7 @@ public class CrimeLab {
     }
 
     /**
-     * Get the crime with a specific UUID
+     * Gets the Crime with a specific UUID
      * @param id
      * @return
      */
