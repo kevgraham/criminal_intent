@@ -38,8 +38,6 @@ public class CrimeListFragment extends Fragment {
     private int mLastUpdatePosition = -1;
     private boolean mSubtitleVisible;
 
-    private List<Crime> mCrimeList = new ArrayList<>();
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,20 +102,22 @@ public class CrimeListFragment extends Fragment {
     private void updateUI() {
         // get model
         CrimeLab crimeLab = CrimeLab.get(getActivity());
+        List<Crime> crimes = crimeLab.getCrimes();
 
         if (mAdapter == null) {
             // pass model to adapter
-            mAdapter = new CrimeAdapter(mCrimeList);
+            mAdapter = new CrimeAdapter(crimes);
             // pass adapter to recycler view
             mCrimeRecyclerView.setAdapter(mAdapter);
         } else {
             // update all items in recycler view
-            mCrimeList.clear();
-            mCrimeList.addAll(crimeLab.getCrimes());
+//            mCrimeList.clear();
+//            mCrimeList.addAll(crimeLab.getCrimes());
+            mAdapter.setCrimes(crimes);
             mAdapter.notifyDataSetChanged();
         }
 
-        if (mCrimeList != null && mCrimeList.size() > 0) {
+        if (crimes != null && crimes.size() > 0) {
             mNoCrimesLayout.setVisibility(View.INVISIBLE);
         } else {
             mNoCrimesLayout.setVisibility(View.VISIBLE);
@@ -274,6 +274,10 @@ public class CrimeListFragment extends Fragment {
         public int getItemViewType(int position) {
             Crime crime = mCrimes.get(position);
             return crime.isRequiresPolice() ? SEVERE_CRIME : NORMAL_CRIME;
+        }
+
+        public void setCrimes(List<Crime> crimes) {
+            mCrimes = crimes;
         }
     }
 }
